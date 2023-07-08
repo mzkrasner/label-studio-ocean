@@ -60,6 +60,7 @@ export const CreateProject = ({ onClose }) => {
 
   // name intentionally skipped from deps:
   // this should trigger only once when we got project loaded
+
   React.useEffect(() => project && !name && setName(project.title), [project]);
 
   const projectBody = React.useMemo(() => ({
@@ -70,6 +71,7 @@ export const CreateProject = ({ onClose }) => {
 
   const onCreate = React.useCallback(async () => {
     const imported = await finishUpload();
+
     if (!imported) return;
 
     setWaitingStatus(true);
@@ -79,6 +81,7 @@ export const CreateProject = ({ onClose }) => {
       },
       body: projectBody,
     });
+
     setWaitingStatus(false);
 
     if (response !== null) {
@@ -96,8 +99,10 @@ export const CreateProject = ({ onClose }) => {
         title: name,
       },
     });
+
     if (res.ok) return;
     const err = await res.json();
+
     setError(err.validation_errors?.title);
   };
 

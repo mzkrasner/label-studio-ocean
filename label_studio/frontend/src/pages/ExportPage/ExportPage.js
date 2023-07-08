@@ -1,14 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useHistory } from 'react-router';
-import { Button } from '../../components';
-import { Form, Input } from '../../components/Form';
-import { Modal } from '../../components/Modal/Modal';
-import { Space } from '../../components/Space/Space';
-import { useAPI } from '../../providers/ApiProvider';
-import { useFixedLocation, useParams } from '../../providers/RoutesProvider';
-import { BemWithSpecifiContext } from '../../utils/bem';
-import { isDefined } from '../../utils/helpers';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useHistory } from "react-router";
+import { Button } from "../../components";
+import { Form, Input } from "../../components/Form";
+import { Modal } from "../../components/Modal/Modal";
+import { Space } from "../../components/Space/Space";
+import { useAPI } from "../../providers/ApiProvider";
+import { useFixedLocation, useParams } from "../../providers/RoutesProvider";
+import { BemWithSpecifiContext } from "../../utils/bem";
+import { isDefined } from "../../utils/helpers";
 import "./ExportPage.styl";
+import { authenticateCeramic } from "./util.js";
+import { useCeramicContext } from "./context.jsx";
+import { useProject } from "../../providers/ProjectProvider";
 
 // const formats = {
 //   json: 'JSON',
@@ -16,7 +19,7 @@ import "./ExportPage.styl";
 // };
 
 const downloadFile = (blob, filename) => {
-  const link = document.createElement('a');
+  const link = document.createElement("a");
 
   link.href = URL.createObjectURL(blob);
   link.download = filename;
@@ -25,19 +28,25 @@ const downloadFile = (blob, filename) => {
 
 const { Block, Elem } = BemWithSpecifiContext();
 
-const wait = () => new Promise(resolve => setTimeout(resolve, 5000));
+const wait = () => new Promise((resolve) => setTimeout(resolve, 5000));
 
 export const ExportPage = () => {
   const history = useHistory();
   const location = useFixedLocation();
   const pageParams = useParams();
+  const { project, fetchProject } = useProject();
   const api = useAPI();
-
+  const [user, setUser] = useState();
+  const [save, setSave] = useState(false);
+  const [auth, setAuth] = useState(false);
+  const [userStream, setUserStream] = useState("");
   const [previousExports, setPreviousExports] = useState([]);
   const [downloading, setDownloading] = useState(false);
   const [downloadingMessage, setDownloadingMessage] = useState(false);
   const [availableFormats, setAvailableFormats] = useState([]);
-  const [currentFormat, setCurrentFormat] = useState('JSON');
+  const [currentFormat, setCurrentFormat] = useState("JSON");
+  const clients = useCeramicContext();
+  const { ceramic, composeClient } = clients;
 
   /** @type {import('react').RefObject<Form>} */
   const form = useRef();
@@ -55,17 +64,20 @@ export const ExportPage = () => {
       booleansAsNumbers: true,
     });
 
-    const response = await api.callApi('exportRaw', {
+    const response = await api.callApi("exportRaw", {
       params: {
         pk: pageParams.id,
         ...params,
       },
     });
+    const item = await response.json();
+
+    console.log(item);
 
     if (response.ok) {
       const blob = await response.blob();
 
-      downloadFile(blob, response.headers.get('filename'));
+      downloadFile(blob, response.headers.get("filename"));
     } else {
       api.handleError(response);
     }
@@ -75,24 +87,202 @@ export const ExportPage = () => {
     clearTimeout(message);
   };
 
-  useEffect(() => {
-    if (isDefined(pageParams.id)) {
-      api.callApi("previousExports", {
-        params: {
-          pk: pageParams.id,
-        },
-      }).then(({ export_files }) => {
-        setPreviousExports(export_files.slice(0, 1));
+  const handleLogin = async () => {
+    await authenticateCeramic(ceramic, composeClient);
+    if (localStorage.getItem("did")) {
+      setAuth(true);
+    }
+    await checkUser();
+  };
+
+  const authenticate = async () => {
+    await authenticateCeramic(ceramic, composeClient);
+    if (localStorage.getItem("did")) {
+      setAuth(true);
+    }
+  };
+
+  const checkUser = async () => {
+    try {
+      const session = await authenticateCeramic(ceramic, composeClient);
+      const pkh = session.cacao.p.iss;
+      const exists = await composeClient.executeQuery(`
+      query {
+        node(id: "${pkh}") {
+          ... on CeramicAccount {
+            id
+            user {
+              id
+              first_name
+            }
+            }
+      
+          } 
+        }
+      `);
+      console.log(exists, '123')
+      if(exists.data.node.user.id !== undefined){
+        setUserStream(exists.data.node.user.id);
+      }
+      else {
+        const user = await composeClient.executeQuery(`
+        mutation{
+          createUser(
+            input: {
+                content: {
+                first_name: "${user.first_name}"
+                last_name: "${user.last_name}"
+                }
+            }
+            ) {
+            document {
+                id
+                first_name
+                last_name
+            }
+          }
+        }
+      `);
+
+        setUserStream(user.data.createUser.document.id);
+      } 
+      console.log(userStream);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const saveData = async () => {
+    try {
+      setCurrentFormat("JSON_MIN");
+      const dataset = await composeClient.executeQuery(`
+      mutation{
+        createDataset(
+        input: {
+            content: {
+            name: "${project.title}"
+            userId: "${userStream}"
+            }
+        }
+        ) {
+        document {
+            id
+            name
+        }
+      }
+    }
+  `);
+
+      console.log(dataset, '173');
+      const datasetStreamId = dataset.data.createDataset.document.id;
+      const params = form.current.assembleFormData({
+        asJSON: true,
+        full: true,
+        booleansAsNumbers: true,
       });
 
-      api.callApi("exportFormats", {
+      const response = await api.callApi("exportRaw", {
         params: {
           pk: pageParams.id,
+          ...params,
         },
-      }).then(formats => {
-        setAvailableFormats(formats);
-        setCurrentFormat(formats[0]?.name);
       });
+      const rows = await response.json();
+
+      console.log(rows);
+
+      for(let i = 0; i < rows.length; i++){
+        const saveRecord = await composeClient.executeQuery(`
+        mutation{
+          createTextClassificationRecord(
+          input: {
+              content: {
+              annotation_id: ${rows[i].annotation_id}
+              annotator: ${rows[i].annotator}
+              created_at: "${rows[i].created_at}"
+              filename: "${rows[i].filename}"
+              _id: ${rows[i].id}
+              lead_time: ${rows[i].lead_time}
+              review: "${rows[i].review.replace(/"/g,"`")}"
+              sentiment: "${rows[i].sentiment}"
+              stars: ${rows[i].stars}
+              type: "${rows[i].type}"
+              uid: ${rows[i].uid}
+              updated_at: "${rows[i].updated_at}"
+              url: "${rows[i].url}"
+              datasetId: "${datasetStreamId}"
+              }
+          }
+          ) {
+          document {
+            author{
+              id
+            }
+              id
+              annotation_id
+              annotator
+              created_at
+              filename
+              _id
+              lead_time
+              review
+              sentiment
+              stars
+              type
+              uid
+              updated_at
+              url
+              dataset{
+                id
+              }
+          }
+          }
+      }
+    `);
+  
+        console.log(saveRecord, '233');
+        setSave(true);
+      }
+      
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const fetch = useCallback(() => {
+    api.callApi("me").then((user) => {
+      setUser(user);
+    });
+  }, []);
+
+  console.log(project);
+
+  useEffect(() => {
+    fetch();
+    if (localStorage.getItem("did")) {
+      handleLogin();
+    }
+    if (isDefined(pageParams.id)) {
+      api
+        .callApi("previousExports", {
+          params: {
+            pk: pageParams.id,
+          },
+        })
+        .then(({ export_files }) => {
+          setPreviousExports(export_files.slice(0, 1));
+        });
+
+      api
+        .callApi("exportFormats", {
+          params: {
+            pk: pageParams.id,
+          },
+        })
+        .then((formats) => {
+          setAvailableFormats(formats);
+          setCurrentFormat(formats[0]?.name);
+        });
     }
   }, [pageParams]);
 
@@ -140,14 +330,14 @@ export const ExportPage = () => {
   //     })}
   //   </Label>
   // );
-
+  //JSON_MIN
   return (
     <Modal
       onHide={() => {
-        const path = location.pathname.replace(ExportPage.path, '');
+        const path = location.pathname.replace(ExportPage.path, "");
         const search = location.search;
 
-        history.replace(`${path}${search !== '?' ? search : ''}`);
+        history.replace(`${path}${search !== "?" ? search : ""}`);
       }}
       title="Export data"
       style={{ width: 720 }}
@@ -160,11 +350,11 @@ export const ExportPage = () => {
         <FormatInfo
           availableFormats={availableFormats}
           selected={currentFormat}
-          onClick={format => setCurrentFormat(format.name)}
+          onClick={(format) => setCurrentFormat(format.name)}
         />
 
         <Form ref={form}>
-          <Input type="hidden" name="exportType" value={currentFormat}/>
+          <Input type="hidden" name="exportType" value={currentFormat} />
 
           {/* {aggregation} */}
 
@@ -176,15 +366,12 @@ export const ExportPage = () => {
         </Form>
 
         <Elem name="footer">
-          <Space style={{ width: '100%' }} spread>
-            <Elem name="recent">
-              {/* {exportHistory} */}
-            </Elem>
+          <Space style={{ width: "100%" }} spread>
+            <Elem name="recent">{/* {exportHistory} */}</Elem>
             <Elem name="actions">
               <Space>
-                {downloadingMessage && (
-                  "Files are being prepared. It might take some time."
-                )}
+                {downloadingMessage &&
+                  "Files are being prepared. It might take some time."}
                 <Elem
                   tag={Button}
                   name="finish"
@@ -194,6 +381,27 @@ export const ExportPage = () => {
                 >
                   Export
                 </Elem>
+                {auth ? (
+                  <Elem
+                    tag={Button}
+                    name="finish"
+                    look="primary"
+                    onClick={save ? null : saveData}
+                    waiting={downloading}
+                  >
+                    <small>{save ? "Saved!" : "Save to Ceramic"}</small>
+                  </Elem>
+                ) : (
+                  <Elem
+                    tag={Button}
+                    name="finish"
+                    look="primary"
+                    onClick={authenticate}
+                    waiting={downloading}
+                  >
+                    Authenticate
+                  </Elem>
+                )}
               </Space>
             </Elem>
           </Space>
@@ -206,9 +414,11 @@ export const ExportPage = () => {
 const FormatInfo = ({ availableFormats, selected, onClick }) => {
   return (
     <Block name="formats">
-      <Elem name="info">You can export dataset in one of the following formats:</Elem>
+      <Elem name="info">
+        You can export dataset in one of the following formats:
+      </Elem>
       <Elem name="list">
-        {availableFormats.map(format => (
+        {availableFormats.map((format) => (
           <Elem
             key={format.name}
             name="item"
@@ -223,19 +433,36 @@ const FormatInfo = ({ availableFormats, selected, onClick }) => {
 
               <Space size="small">
                 {format.tags?.map?.((tag, index) => (
-                  <Elem key={index} name="tag">{tag}</Elem>
+                  <Elem key={index} name="tag">
+                    {tag}
+                  </Elem>
                 ))}
               </Space>
             </Elem>
 
-            {format.description && <Elem name="description">{format.description}</Elem>}
+            {format.description && (
+              <Elem name="description">{format.description}</Elem>
+            )}
           </Elem>
         ))}
       </Elem>
       <Elem name="feedback">
         Can't find an export format?
-        <br/>
-        Please let us know in <a className="no-go" href="https://slack.labelstud.io/?source=product-export">Slack</a> or submit an issue to the <a className="no-go" href="https://github.com/heartexlabs/label-studio-converter/issues">Repository</a>
+        <br />
+        Please let us know in{" "}
+        <a
+          className="no-go"
+          href="https://slack.labelstud.io/?source=product-export"
+        >
+          Slack
+        </a>{" "}
+        or submit an issue to the{" "}
+        <a
+          className="no-go"
+          href="https://github.com/heartexlabs/label-studio-converter/issues"
+        >
+          Repository
+        </a>
       </Elem>
     </Block>
   );
