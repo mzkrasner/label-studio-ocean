@@ -100,6 +100,7 @@ export const ExportPage = () => {
     if (localStorage.getItem("did")) {
       setAuth(true);
     }
+    await checkUser();
   };
 
   const checkUser = async () => {
@@ -120,7 +121,8 @@ export const ExportPage = () => {
           } 
         }
       `);
-      console.log(exists, '123')
+
+      console.log(exists, '123');
       if(exists.data.node.user.id !== undefined){
         setUserStream(exists.data.node.user.id);
       }
