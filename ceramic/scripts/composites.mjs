@@ -25,10 +25,10 @@ export const writeComposite = async (spinner) => {
 
   const userComposite = await createComposite(
     ceramic,
-    "./composites-newer/00-User.graphql"
+    "./composites/00-User.graphql"
   );
 
-  const datasetSchema = readFileSync("./composites-newer/01-Dataset.graphql", {
+  const datasetSchema = readFileSync("./composites/01-Dataset.graphql", {
     encoding: "utf-8",
   }).replace("$USER_ID", userComposite.modelIDs[0])
 
@@ -37,7 +37,7 @@ export const writeComposite = async (spinner) => {
     schema: datasetSchema,
   });
 
-  const textClassificationSchema = readFileSync("./composites-newer/02-TextClassificationRecord.graphql", {
+  const textClassificationSchema = readFileSync("./composites/02-TextClassificationRecord.graphql", {
     encoding: "utf-8",
   }).replace("$DATASET_ID", dataSetComposite.modelIDs[1])
 
@@ -46,7 +46,7 @@ export const writeComposite = async (spinner) => {
     schema: textClassificationSchema,
   });
 
-  const datasetConnectSchema = readFileSync("./composites-newer/03-DatasetConnect.graphql", {
+  const datasetConnectSchema = readFileSync("./composites/03-DatasetConnect.graphql", {
     encoding: "utf-8",
   }).replace("$TEXTCLASSIFICATION_ID", textClassificationComposite.modelIDs[1])
     .replace("$DATASET_ID", dataSetComposite.modelIDs[1])
@@ -56,7 +56,7 @@ export const writeComposite = async (spinner) => {
     schema: datasetConnectSchema,
   });
 
-  const userConnectSchema = readFileSync("./composites-newer/04-UserConnect.graphql", {
+  const userConnectSchema = readFileSync("./composites/04-UserConnect.graphql", {
     encoding: "utf-8",
   }).replace("$DATASET_ID", dataSetComposite.modelIDs[1])
     .replace("$USER_ID", userComposite.modelIDs[0])

@@ -12,6 +12,7 @@ import "./ExportPage.styl";
 import { authenticateCeramic } from "./util.js";
 import { useCeramicContext } from "./context.jsx";
 import { useProject } from "../../providers/ProjectProvider";
+import { useConfig } from '../../providers/ConfigProvider';
 
 // const formats = {
 //   json: 'JSON',
@@ -34,6 +35,7 @@ export const ExportPage = () => {
   const history = useHistory();
   const location = useFixedLocation();
   const pageParams = useParams();
+  const config = useConfig();
   const { project, fetchProject } = useProject();
   const api = useAPI();
   const [user, setUser] = useState();
@@ -70,9 +72,8 @@ export const ExportPage = () => {
         ...params,
       },
     });
-    const item = await response.json();
 
-    console.log(item);
+    await response.json();
 
     if (response.ok) {
       const blob = await response.blob();
@@ -123,17 +124,17 @@ export const ExportPage = () => {
       `);
 
       console.log(exists, '123');
-      if(exists.data.node.user.id !== undefined){
+      if(exists.data.node.user !== null){
         setUserStream(exists.data.node.user.id);
       }
       else {
-        const user = await composeClient.executeQuery(`
+        const newUser = await composeClient.executeQuery(`
         mutation{
           createUser(
             input: {
                 content: {
-                first_name: "${user.first_name}"
-                last_name: "${user.last_name}"
+                first_name: "${config.user.first_name}"
+                last_name: "${config.user.last_name}"
                 }
             }
             ) {
@@ -146,7 +147,7 @@ export const ExportPage = () => {
         }
       `);
 
-        setUserStream(user.data.createUser.document.id);
+        setUserStream(newUser.data.createUser.document.id);
       } 
       console.log(userStream);
     } catch (error) {
@@ -256,8 +257,6 @@ export const ExportPage = () => {
       setUser(user);
     });
   }, []);
-
-  console.log(project);
 
   useEffect(() => {
     fetch();
