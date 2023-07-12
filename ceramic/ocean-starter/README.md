@@ -8,7 +8,7 @@
 
 After following the steps above, use the following steps:
 
-1. Run "npm install" within the ceramic/ocean-starter directory. Once finished, run "npm run dev" to start your Ceramic node
+1. Run "npm install" within the ceramic/ocean-starter directory. Once finished, run "npm run dev" to start your Ceramic node (make sure you're using node v16 - run "node -v" in your terminal to verify)
 2. In a new terminal in the label_studio/frontend directory, run the following:
 ```bash
 # Install all the necessary modules
