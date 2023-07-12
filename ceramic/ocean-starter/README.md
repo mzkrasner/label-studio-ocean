@@ -6,10 +6,14 @@
 
 ## Getting Started
 
+**Please note you will need to have Docker locally installed
+
 After following the steps above, use the following steps:
 
-1. Run "npm install" within the ceramic/ocean-starter directory. Once finished, run "npm run dev" to start your Ceramic node (make sure you're using node v16 - run "node -v" in your terminal to verify)
-2. In a new terminal in the label_studio/frontend directory, run the following:
+1. Run "npm install" within the ceramic/ocean-starter directory. 
+2. Run "docker-compose up" in the same terminal once installation has completed
+3. In a new terminal run "npm run dev" to start your Ceramic node (make sure you're using node v16 - run "node -v" in your terminal to verify)
+4. In another new terminal, cd into the label_studio/frontend directory and run the following:
 ```bash
 # Install all the necessary modules
 yarn install 
@@ -17,7 +21,7 @@ yarn install
 # Run webpack
 npx webpack
 ```
-3. In a new terminal in the root (label-studio-ocean) directory, install Label Studio locally, and then start the server: 
+5. In a new terminal in the root (label-studio-ocean) directory, install Label Studio locally, and then start the server: 
 ```bash
 # Install all package dependencies
 pip install -e .
@@ -28,7 +32,8 @@ python label_studio/manage.py collectstatic
 python label_studio/manage.py runserver
 ```
 
-4. Navigate to localhost:8080 in your browser to begin using the application
+6. Navigate to localhost:8080 in your browser to begin using the application
+7. You may have to wait some time for your node to sync data before running queries using the steps below
 
 ### TextClassification
 
