@@ -46,6 +46,10 @@ The application and corresponding data types you launched using the steps above 
 9. To authenticate yourself and start a session with Ceramic using sign in with Ethereum, hit "Authenticate"
 10. Once authenticated, you may hit the "Save to Ceramic" button and the dataset will be automatically saved corresponding to your account within ComposeDB/Ceramic --> feel free to explore the console logs as this is happening
 
+## Example Queries
+
+You can reference the [Example Queries](https://github.com/mzkrasner/label-studio-ocean/blob/main/ceramic/ocean-starter/example-queries/EXAMPLES.md) page in this repository to see how to access datasets by account or StreamID
+
 ## Learn More
 
 To learn more about Ceramic please visit the following links
