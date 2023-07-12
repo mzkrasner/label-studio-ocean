@@ -12,7 +12,7 @@ After following the steps above, use the following steps:
 2. In a new terminal in the label_studio/frontend directory, run the following:
 ```bash
 # Install all the necessary modules
-yarn install --frozen-lockfile
+yarn install 
 
 # Run webpack
 npx webpack
