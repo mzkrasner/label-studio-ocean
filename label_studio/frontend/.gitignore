@@ -2,4 +2,3 @@ report.*.json
 .env*
 !.env.example
 !*.lock
-admin_seed.txt
