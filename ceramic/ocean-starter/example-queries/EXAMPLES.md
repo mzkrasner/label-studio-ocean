@@ -40,6 +40,8 @@ query {
       } 
 ```
 
+## Getting a dataset by known StreamID
+
 If you already know the StreamID of the dataset you're looking for, you can also search for it directly:
 
 ```
