@@ -16,7 +16,7 @@ query {
                     edges{
                       node{
                         id
-                     	  annotation_id
+                     	annotation_id
                         annotator
                         created_at
                         filename
@@ -52,18 +52,18 @@ query {
                 node {
                     id
                     annotation_id
-              			annotator
-              			created_at
-              			filename
-              			_id
-              			lead_time
-              			review
-              			sentiment
-              			stars
-              			type
-              			uid
-              			updated_at
-              			url
+                    annotator
+                    created_at
+                    filename
+                    _id
+                    lead_time
+                    review
+                    sentiment
+                    stars
+                    type
+                    uid
+                    updated_at
+                    url
                 }
               }
             }
