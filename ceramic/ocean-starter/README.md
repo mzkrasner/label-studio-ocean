@@ -1,7 +1,7 @@
 ## Initial Setup
 
 1. You will need to add both your admin seed into the admin_seed.txt file, and your admin did into the composedb.config.json file within the ceramic/ocean-starter directory
-2. You will also need to place your admin seed into an admin_seed.txt file you will need to create within the label_studio/frontend directory
+2. You will also need to place your admin seed into an admin_seed.txt file you will need to create within the label_studio/frontend directory. If you need to set one up, you can always do so using the [Create Ceramic App repo](https://github.com/ceramicstudio/create-ceramic-app)
 3. Make sure to edit "db" property in the composedb.config.json file within the ceramic/ocean-starter to reflect the name of your personal username
 
 ## Getting Started
