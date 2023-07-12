@@ -17,7 +17,7 @@ yarn install
 # Run webpack
 npx webpack
 ```
-3. In a new terminal in the root (label-studio) directory, install Label Studio locally, and then start the server: 
+3. In a new terminal in the root (label-studio-ocean) directory, install Label Studio locally, and then start the server: 
 ```bash
 # Install all package dependencies
 pip install -e .
@@ -27,6 +27,24 @@ python label_studio/manage.py collectstatic
 # Start the server in development mode at http://localhost:8080
 python label_studio/manage.py runserver
 ```
+
+4. Navigate to localhost:8080 in your browser to begin using the application
+
+### TextClassification
+
+The application and corresponding data types you launched using the steps above are tailored to the process of textclassification LLM fine-tuning. In order to set up a new project, use the following steps:
+
+1. Navigate to this page: http://localhost:8080/user/signup --> sign up with any email or password (email does not have to be valid)
+1a. After logging in, feel free to navigate to your user settings by clicking the circle in the upper right-hand corner, "Account & Settings" and saving your First Name and Last Name (these will be automatically pulled into Ceramic upon save)
+2. Once logged in, select the "Create" button in the upper right-hand side
+3. Once the "Create Project" modal pops up, select the "Data Import" tab and "Upload Files" --> the file you will be uploading is included in this repository under ceramic/dummy-dataset (named "dataset.csv")
+4. Select "Treat CSV/TSV as List of tasks" and hit "Save" in the upper right hand corner
+5. You should have now arrived on your project page. Hit "settings" in the right-hand corner, "Labeling Interface" on the left side, "Browse Templates", "Natural Language Processing" and "Text Classification"
+6. Remove the "Neutral" option on the next page by clicking the red "X" next to Neutral, and hit save below
+7. Begin labeling each entry 
+8. When you are finished labeling your dataset, back on the project page for this project hit the "Export" button between "Import" and "List"
+9. To authenticate yourself and start a session with Ceramic using sign in with Ethereum, hit "Authenticate"
+10. Once authenticated, you may hit the "Save to Ceramic" button and the dataset will be automatically saved corresponding to your account within ComposeDB/Ceramic --> feel free to explore the console logs as this is happening
 
 ## Learn More
 
