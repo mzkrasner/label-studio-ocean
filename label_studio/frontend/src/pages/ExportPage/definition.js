@@ -2,15 +2,15 @@
 export const definition = {
   models: {
     User: {
-      id: "kjzl6hvfrbw6c96g4wonqjl65qs2nt10ep6i1e7j8euudf6y5b58859v3yyixaj",
+      id: "kjzl6hvfrbw6cbbc9yvvt3ntcsym5xss8xy0zh50mbsx90uxunl2z0a32nnanxh",
       accountRelation: { type: "single" },
     },
     Dataset: {
-      id: "kjzl6hvfrbw6c9bro4iy4xy895r2feyfig8le750tlyqiclxk6ut751p75urkhs",
+      id: "kjzl6hvfrbw6c53gdyv53qqjoy1r0p1qxor1bm7nmq4q99axpur85bgjv9zrlrt",
       accountRelation: { type: "list" },
     },
     TextClassificationRecord: {
-      id: "kjzl6hvfrbw6c6u7x9jq147e82npyv1x56znggr7n8lzb27s4lyaqkgxr5rsdeu",
+      id: "kjzl6hvfrbw6c8kbvpxj4jzijdpx14bsetk4bv38329x24kdkguz3la8j7narpa",
       accountRelation: { type: "list" },
     },
   },
@@ -25,7 +25,7 @@ export const definition = {
         relation: {
           source: "queryConnection",
           model:
-            "kjzl6hvfrbw6c9bro4iy4xy895r2feyfig8le750tlyqiclxk6ut751p75urkhs",
+            "kjzl6hvfrbw6c53gdyv53qqjoy1r0p1qxor1bm7nmq4q99axpur85bgjv9zrlrt",
           property: "userId",
         },
       },
@@ -40,7 +40,7 @@ export const definition = {
         relation: {
           source: "document",
           model:
-            "kjzl6hvfrbw6c96g4wonqjl65qs2nt10ep6i1e7j8euudf6y5b58859v3yyixaj",
+            "kjzl6hvfrbw6cbbc9yvvt3ntcsym5xss8xy0zh50mbsx90uxunl2z0a32nnanxh",
           property: "userId",
         },
       },
@@ -51,7 +51,7 @@ export const definition = {
         relation: {
           source: "queryConnection",
           model:
-            "kjzl6hvfrbw6c6u7x9jq147e82npyv1x56znggr7n8lzb27s4lyaqkgxr5rsdeu",
+            "kjzl6hvfrbw6c8kbvpxj4jzijdpx14bsetk4bv38329x24kdkguz3la8j7narpa",
           property: "datasetId",
         },
       },
@@ -78,7 +78,7 @@ export const definition = {
         relation: {
           source: "document",
           model:
-            "kjzl6hvfrbw6c9bro4iy4xy895r2feyfig8le750tlyqiclxk6ut751p75urkhs",
+            "kjzl6hvfrbw6c53gdyv53qqjoy1r0p1qxor1bm7nmq4q99axpur85bgjv9zrlrt",
           property: "datasetId",
         },
       },

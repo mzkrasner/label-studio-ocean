@@ -46,7 +46,7 @@ If you already know the StreamID of the dataset you're looking for, you can also
 
 ```
 query {
-        node(id: "kjzl6kcym7w8y5nw29y15r5v92wv5vkcfk4oaajjez2satfxk5b735wqdw5d46r") {
+        node(id: "kjzl6kcym7w8yb713oc902rf3xg7f6flw2au2k4yt88aoi8e6z9oxeejwkkj1lg") {
             ... on Dataset {
             id
             textClassificationRecords(first: 20) {
